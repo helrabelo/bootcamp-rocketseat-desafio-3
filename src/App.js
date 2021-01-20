@@ -19,23 +19,33 @@ function App() {
   }
 
   async function handleRemoveRepository(id) {
-    api.delete(`/repositories/${id}`).then(({ data }) => setRepositories(data));
+    await api.delete(`/repositories/${id}`);
+
+    setRepositories(repositories.filter((repository) => repository.id !== id));
+  }
+
+  async function loadRepositories() {
+    const { data } = await api.get('/repositories');
+    setRepositories(data);
   }
 
   useEffect(() => {
-    const { data } = api.get('/repositories');
-    setRepositories(data);
-  });
+    loadRepositories();
+  }, []);
 
   return (
     <div>
       <ul data-testid="repository-list">
-        {repositories.map((repository) => (
-          <li key={repository.id}>
-            {repository.title}
-            <button onClick={() => handleRemoveRepository(repository.id)}>Remover</button>
-          </li>
-        ))}
+        {repositories.length > 0
+          ? repositories.map((repository) => (
+              <li key={repository.id}>
+                {repository.title}
+                <button onClick={() => handleRemoveRepository(repository.id)}>
+                  Remover
+                </button>
+              </li>
+            ))
+          : null}
       </ul>
 
       <button onClick={handleAddRepository}>Adicionar</button>
